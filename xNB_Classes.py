@@ -5,9 +5,9 @@ class xAAD:
 
 class xAIFSElement:
     def __init__(self,x,mu_hat,nu_hat):
-        self.object = x
-        self.object = mu_hat
-        self.object = nu_hat
+        self.x = x
+        self.mu_hat = mu_hat
+        self.nu_hat = nu_hat
 
     def buoyancy(self):
         return self.mu_hat - self.nu_hat
