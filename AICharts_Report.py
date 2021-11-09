@@ -10,7 +10,14 @@ import xNB_Classes
 import networkx as nx
 
 
-def AIChart_plot_data_treemap(xAAD,title='Treemap',limit=0,saveImg = False):
+def save_as_fig_pdf(title,saveImg = False,savePDF = False):
+    if saveImg:
+        plt.savefig('{title}.png'.format(title=title))
+    if savePDF:
+        plt.savefig('{title}.pdf'.format(title=title))
+
+
+def AIChart_plot_data_treemap(xAAD,title='Treemap',limit=0,saveImg = False,savePDF = False,show=True):
     dictionary = xAAD.dictionary
     k,v = dictionary.keys(),dictionary.values()
     df = pd.DataFrame.from_dict({'token':k,'weight':v}) #Dataframe to sort the data
@@ -31,15 +38,16 @@ def AIChart_plot_data_treemap(xAAD,title='Treemap',limit=0,saveImg = False):
     ax = squarify.plot(weights,label=tokens,text_kwargs={'color':'#ffffff' ,'size': 8},color=colors)
     plt.axis('off')
     ax.set_title(title)
-    if saveImg:
-        plt.savefig('{title}.png'.format(title=title))
-    plt.show()
+    save_as_fig_pdf(title,saveImg=saveImg,savePDF=savePDF)
+    if show:
+        plt.show()
     
 
 
 
-def AIChart_plot_data_word_graph(xAAD,text_list):
+def AIChart_plot_data_word_graph(xAAD,text_list,show=True,title="Word Graph",saveImg = False,savePDF = False):
     dictionary = xAAD.dictionary
+    fig = plt.figure()
     G = nx.Graph()
     graph_dictionary = {}
     for k,v in dictionary.items():
@@ -64,13 +72,18 @@ def AIChart_plot_data_word_graph(xAAD,text_list):
         for edge in v['edges']:
             G.add_edge(k,edge)
     pos = nx.spring_layout(G, k=0.2, iterations=30)
+    ax = fig.add_subplot(111,aspect="equal")
     nx.draw(G,pos,with_labels=True,node_size=node_size,font_color="black",font_size=10,edge_color='#999999',width=1,node_color="#ff5757")
-    plt.show()
+    ax.set_title(title)
+    save_as_fig_pdf(title,saveImg=saveImg,savePDF=savePDF)
+    if show:
+        plt.show()
 
 
-def AIChart_plot_data_text(xAAD,text_list):
+def AIChart_plot_data_Influence_Map(xAAD,text_list,title="Influence Map",show=True,saveImg = False,savePDF = False):
     dictionary = xAAD.dictionary
-    fig = plt.figure()
+    fig = figure(figsize=(16,9))
+    ax = fig.add_subplot(111,aspect=9/16)
     contador = 0
     while len(text_list) > contador*contador:
         contador = contador + 1
@@ -89,12 +102,14 @@ def AIChart_plot_data_text(xAAD,text_list):
         else:
             plt.text(next_word,contador - next_line,word,fontsize=font_size,color='red',wrap=True)
         
-        next_word = next_word + len(word)*0.15*font_size/30 + 0.2
-
+        next_word = next_word + len(word)*0.13*font_size/30 + 0.15
         #plt.text(j,contador - i - 1,text_list[indice],fontsize=font_size,wrap=True)
-    plt.axis([0,contador+1,0,contador+1])
+    ax.set_title(title)
+    plt.axis([0.5,contador,0.5,contador])
     plt.axis('off')
-    plt.show()
+    save_as_fig_pdf(title,saveImg=saveImg,savePDF=savePDF)
+    if show:
+        plt.show()
 #test
 word_dicc = {}
 full_text_list = []
@@ -106,6 +121,6 @@ with open("test.txt","r") as file:
 data = xNB_Classes.xAAD(rd.random(),word_dicc)
 
 
-AIChart_plot_data_treemap(data)
-AIChart_plot_data_word_graph(data,full_text_list)
-AIChart_plot_data_text(data,full_text_list)
+#AIChart_plot_data_treemap(data,savePDF=True)
+#AIChart_plot_data_word_graph(data,full_text_list)
+#AIChart_plot_data_Influence_Map(data,full_text_list,saveImg=True)
