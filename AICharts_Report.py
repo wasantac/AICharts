@@ -116,7 +116,7 @@ def AIChart_plot_data_Influence_Map(xAAD,text_list,title="Influence Map",show=Tr
         plt.show()
 #test
 word_dicc = {}
-full_text_list = ["a"]
+full_text_list = []
 
 with open("test.txt","r") as file:
     words = file.readlines()
