@@ -92,7 +92,7 @@ def AIChart_plot_data_text(xAAD,text_list):
         next_word = next_word + len(word)*0.15*font_size/30 + 0.2
 
         #plt.text(j,contador - i - 1,text_list[indice],fontsize=font_size,wrap=True)
-    plt.axis([1,contador+1,-1,contador+1])
+    plt.axis([0,contador+1,0,contador+1])
     plt.axis('off')
     plt.show()
 #test
@@ -106,6 +106,6 @@ with open("test.txt","r") as file:
 data = xNB_Classes.xAAD(rd.random(),word_dicc)
 
 
-#AIChart_plot_data_treemap(data)
-#AIChart_plot_data_word_graph(data,full_text_list)
+AIChart_plot_data_treemap(data)
+AIChart_plot_data_word_graph(data,full_text_list)
 AIChart_plot_data_text(data,full_text_list)
