@@ -94,14 +94,18 @@ def AIChart_plot_data_Influence_Map(xAAD,text_list,title="Influence Map",show=Tr
             next_line = next_line + 1
             next_word = 0
         word = text_list[i]
-        font_size = dictionary[word] * 30
-        if font_size < 8:
-            font_size = 9
-        if font_size < 15:
-            plt.text(next_word,contador - next_line,word,fontsize=font_size,color='blue',fontstyle='oblique',wrap=True)
+        font_size = 15
+        if word not in dictionary.keys():
+            plt.text(next_word,contador - next_line,word,fontsize=15,color='black',wrap=True)
         else:
-            plt.text(next_word,contador - next_line,word,fontsize=font_size,color='red',wrap=True)
-        
+            font_size = dictionary[word] * 30
+            if font_size < 8:
+                font_size = 9
+            if font_size < 15:
+                plt.text(next_word,contador - next_line,word,fontsize=font_size,color='blue',fontstyle='oblique',wrap=True)
+            else:
+                plt.text(next_word,contador - next_line,word,fontsize=font_size,color='red',wrap=True)
+            
         next_word = next_word + len(word)*0.13*font_size/30 + 0.15
         #plt.text(j,contador - i - 1,text_list[indice],fontsize=font_size,wrap=True)
     ax.set_title(title)
@@ -112,7 +116,8 @@ def AIChart_plot_data_Influence_Map(xAAD,text_list,title="Influence Map",show=Tr
         plt.show()
 #test
 word_dicc = {}
-full_text_list = []
+full_text_list = ["a"]
+
 with open("test.txt","r") as file:
     words = file.readlines()
     for line in words:
@@ -123,4 +128,4 @@ data = xNB_Classes.xAAD(rd.random(),word_dicc)
 
 #AIChart_plot_data_treemap(data,savePDF=True)
 #AIChart_plot_data_word_graph(data,full_text_list)
-#AIChart_plot_data_Influence_Map(data,full_text_list,saveImg=True)
+AIChart_plot_data_Influence_Map(data,full_text_list,saveImg=True)
