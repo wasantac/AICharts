@@ -10,14 +10,16 @@ import xNB_Classes
 import networkx as nx
 
 
-def save_as_fig_pdf(title,saveImg = False,savePDF = False):
+def AIChart_save_file(title,saveImg = False,savePDF = False,saveEPS= False):
     if saveImg:
         plt.savefig('{title}.png'.format(title=title))
     if savePDF:
         plt.savefig('{title}.pdf'.format(title=title))
+    if saveEPS:
+        plt.savefig('{title}.eps'.format(title=title),format='eps')
 
 
-def AIChart_plot_data_treemap(xAAD,title='Treemap',limit=0,saveImg = False,savePDF = False,show=True):
+def AIChart_plot_data_treemap(xAAD,title='Treemap',limit=0,saveImg = False,savePDF = False,saveEPS=False,show=True):
     dictionary = xAAD.dictionary
     k,v = dictionary.keys(),dictionary.values()
     df = pd.DataFrame.from_dict({'token':k,'weight':v}) #Dataframe to sort the data
@@ -38,14 +40,14 @@ def AIChart_plot_data_treemap(xAAD,title='Treemap',limit=0,saveImg = False,saveP
     ax = squarify.plot(weights,label=tokens,text_kwargs={'color':'#ffffff' ,'size': 8},color=colors)
     plt.axis('off')
     ax.set_title(title)
-    save_as_fig_pdf(title,saveImg=saveImg,savePDF=savePDF)
+    AIChart_save_file(title,saveImg=saveImg,savePDF=savePDF,saveEPS=saveEPS)
     if show:
         plt.show()
     
 
 
 
-def AIChart_plot_data_word_graph(xAAD,text_list,show=True,title="Word Graph",saveImg = False,savePDF = False):
+def AIChart_plot_data_word_graph(xAAD,text_list,show=True,title="Word Graph",saveImg = False,savePDF = False,saveEPS= False):
     dictionary = xAAD.dictionary
     fig = plt.figure()
     G = nx.Graph()
@@ -75,12 +77,12 @@ def AIChart_plot_data_word_graph(xAAD,text_list,show=True,title="Word Graph",sav
     ax = fig.add_subplot(111,aspect="equal")
     nx.draw(G,pos,with_labels=True,node_size=node_size,font_color="black",font_size=10,edge_color='#999999',width=1,node_color="#ff5757")
     ax.set_title(title)
-    save_as_fig_pdf(title,saveImg=saveImg,savePDF=savePDF)
+    AIChart_save_file(title,saveImg=saveImg,savePDF=savePDF,saveEPS=saveEPS)
     if show:
         plt.show()
 
 
-def AIChart_plot_data_Influence_Map(xAAD,text_list,title="Influence Map",show=True,saveImg = False,savePDF = False):
+def AIChart_plot_data_Influence_Map(xAAD,text_list,title="Influence Map",show=True,saveImg = False,savePDF = False,saveEPS= False,color=False):
     dictionary = xAAD.dictionary
     fig = figure(figsize=(16,9))
     ax = fig.add_subplot(111,aspect=9/16)
@@ -99,19 +101,28 @@ def AIChart_plot_data_Influence_Map(xAAD,text_list,title="Influence Map",show=Tr
             plt.text(next_word,contador - next_line,word,fontsize=15,color='black',wrap=True)
         else:
             font_size = dictionary[word] * 30
-            if font_size < 8:
-                font_size = 9
-            if font_size < 15:
-                plt.text(next_word,contador - next_line,word,fontsize=font_size,color='blue',fontstyle='oblique',wrap=True)
+            if color:
+                if font_size < 8:
+                    font_size = 9
+                if font_size < 15:
+                    plt.text(next_word,contador - next_line,word,fontsize=font_size,color='blue',fontstyle='oblique',wrap=True)
+                else:
+                    plt.text(next_word,contador - next_line,word,fontsize=font_size,color='red',wrap=True)    
             else:
-                plt.text(next_word,contador - next_line,word,fontsize=font_size,color='red',wrap=True)
+                if font_size < 8:
+                    font_size = 9
+                if font_size < 15:
+                    plt.text(next_word,contador - next_line,r'\underline{%s}'%(word),useTex=True,fontsize=font_size,color='black',fontstyle='oblique',wrap=True)
+                else:
+                    plt.text(next_word,contador - next_line,word,fontsize=font_size,color='black',wrap=True)
+
             
         next_word = next_word + len(word)*0.13*font_size/30 + 0.15
         #plt.text(j,contador - i - 1,text_list[indice],fontsize=font_size,wrap=True)
     ax.set_title(title)
     plt.axis([0.5,contador,0.5,contador])
     plt.axis('off')
-    save_as_fig_pdf(title,saveImg=saveImg,savePDF=savePDF)
+    AIChart_save_file(title,saveImg=saveImg,savePDF=savePDF,saveEPS=saveEPS)
     if show:
         plt.show()
 #test
@@ -128,4 +139,4 @@ data = xNB_Classes.xAAD(rd.random(),word_dicc)
 
 #AIChart_plot_data_treemap(data,savePDF=True)
 #AIChart_plot_data_word_graph(data,full_text_list)
-AIChart_plot_data_Influence_Map(data,full_text_list,saveImg=True)
+AIChart_plot_data_Influence_Map(data,full_text_list,color=True)
