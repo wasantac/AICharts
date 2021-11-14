@@ -37,7 +37,7 @@ def AIChart_plot_data_treemap(xAAD,title='Treemap',limit=0,saveImg = False,saveP
     colors = [cmap(norm(value)) for value in weights] #Color mapping normalization
     fig = figure(figsize=(10,10)) #Figure size
     ax = fig.add_subplot(111,aspect="equal")
-    ax = squarify.plot(weights,label=tokens,text_kwargs={'color':'#ffffff' ,'size': 8},color=colors)
+    ax = squarify.plot(weights,label=tokens,text_kwargs={'color':'#ffffff' ,'size': 8},color=colors,bar_kwargs=dict(linewidth=1, edgecolor="#222222"))
     plt.axis('off')
     ax.set_title(title)
     AIChart_save_file(title,saveImg=saveImg,savePDF=savePDF,saveEPS=saveEPS)
@@ -137,6 +137,6 @@ with open("test.txt","r") as file:
 data = xNB_Classes.xAAD(rd.random(),word_dicc)
 
 
-#AIChart_plot_data_treemap(data,savePDF=True)
+AIChart_plot_data_treemap(data,savePDF=True)
 #AIChart_plot_data_word_graph(data,full_text_list)
-AIChart_plot_data_Influence_Map(data,full_text_list,color=True)
+#AIChart_plot_data_Influence_Map(data,full_text_list,color=True)
