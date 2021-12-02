@@ -29,7 +29,7 @@ def learning_process(A,Xo):
     ua = w / 1 #w / ||w||
     
     ta = -b / 1 #-b / ||w||
-    knowledge_model = (ua,)
+    knowledge_model = (ua,ta)
     return knowledge_model
 
 def evaluation_process(x,knowledge_model):
