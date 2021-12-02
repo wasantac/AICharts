@@ -137,6 +137,6 @@ with open("test.txt","r") as file:
 data = xNB_Classes.xAAD(rd.random(),word_dicc)
 
 
-AIChart_plot_data_treemap(data,savePDF=True)
+#AIChart_plot_data_treemap(data,savePDF=True)
 #AIChart_plot_data_word_graph(data,full_text_list)
 #AIChart_plot_data_Influence_Map(data,full_text_list,color=True)
