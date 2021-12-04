@@ -9,8 +9,12 @@ class xAIFSElement:
         self.mu_hat = mu_hat
         self.nu_hat = nu_hat
 
+    def __repr__(self):
+        return '[' + str(self.x) + ',' + str(self.mu_hat) + ',' + str(self.nu_hat) + ']' 
+        
     def buoyancy(self):
         return self.mu_hat - self.nu_hat
     
     def hesitation(self):
         return 1.0 - self.mu_hat - self.nu_hat
+    
