@@ -1,7 +1,6 @@
 import math
 import xNB_Classes
 import numpy as np
-import re
 import AICharts_Report
 def pre_processing_cat():
     with open('./data/reuter2-cat-doc.qrels') as file:
@@ -30,10 +29,10 @@ def pre_procesing_train():
 def learning_process(A,Xo,categories):
     members_A = 0
     non_members_A = 0
-    Fxo = set()
-    F_is_a = {}
-    F_not_a = {}
-    for keys,values in Xo.items():
+    Fxo = set() #Feature Set
+    F_is_a = {} #F is member of category A
+    F_not_a = {} # F is not member of category A
+    for keys,values in Xo.items(): #Count Words and Memebers
         list_words = values.split(' ')
         list_words = list(filter(None,list_words))
         if keys in categories[A]:
@@ -52,44 +51,55 @@ def learning_process(A,Xo,categories):
                 else:
                     F_not_a[f]['count'] += 1
                 Fxo.add(f)
-    total = members_A + non_members_A
-    prob_A = math.log((members_A + 1)/(total+1))
-    prob_not_A = math.log((non_members_A + 1)/(total + 1))
-    for f in Fxo:
-        if f in F_is_a.keys():
-            try:
-                prob_f_a = math.log((F_is_a[f]['count'] + 1)/(F_is_a[f]['count'] + F_not_a[f]['count'] + len(Fxo)))
-                F_is_a[f]['prob'] = prob_f_a
-            except KeyError:
-                prob_f_a = math.log((F_is_a[f]['count'] + 1)/(F_is_a[f]['count'] + 0 + len(Fxo)))
-                F_is_a[f]['prob'] = prob_f_a
-        if f in F_not_a.keys():
-            try:
-                prob_f_not_a = math.log((F_not_a[f]['count'] + 1)/(F_is_a[f]['count'] + F_not_a[f]['count'] + len(Fxo)))
-                F_not_a[f]['prob'] = prob_f_not_a 
-            except KeyError:
-                prob_f_not_a = math.log((F_not_a[f]['count'] + 1)/(0 + F_not_a[f]['count'] + len(Fxo)))
-                F_not_a[f]['prob'] = prob_f_not_a 
+
+
+    total = members_A + non_members_A 
+    prob_A = math.log((members_A + 1)/(total+1),10) #Probability of A
+    prob_not_A = math.log((non_members_A + 1)/(total + 1),10) #Probability of not A
+    for f in Fxo: #Conditional Probabilites
+        if f in F_is_a.keys() and f in F_not_a.keys():
+            calc_a = (F_is_a[f]['count'] + 1)/(F_is_a[f]['count'] + F_not_a[f]['count'] + len(Fxo))
+            calc_not_a = (F_not_a[f]['count'] + 1)/(F_is_a[f]['count'] + F_not_a[f]['count'] + len(Fxo))
+
+            prob_f_a = math.log(calc_a,10)
+            prob_f_not_a = math.log(calc_not_a,10)
+
+            F_is_a[f]['prob'] = prob_f_a
+            F_not_a[f]['prob'] =  prob_f_not_a
+        elif f in F_is_a.keys() and f not in F_not_a.keys():
+            calc_a = (F_is_a[f]['count'] + 1)/(F_is_a[f]['count'] + 0 + len(Fxo))
+            prob_f_a = math.log(calc_a,10)
+            F_is_a[f]['prob'] = prob_f_a
+        elif f not in F_is_a.keys() and f in F_not_a.keys():
+            calc_not_a = (F_not_a[f]['count'] + 1)/( 0+ F_not_a[f]['count'] + len(Fxo))
+            prob_f_not_a = math.log(calc_not_a ,10)
+            F_not_a[f]['prob'] =  prob_f_not_a
+
+
     b = prob_A - prob_not_A
     w_dicc ={}
-    for f in Fxo:
+    for f in Fxo: 
         if f in F_is_a.keys() and f in F_not_a.keys():
-            w_dicc.update({f:(F_is_a[f]['prob'] - F_not_a[f]['prob'])*(F_is_a[f]['count'] + F_not_a[f]['count'])})
+            calc = (F_is_a[f]['prob'] - F_not_a[f]['prob'])
+            w_dicc.update({f:calc})
         elif f in F_is_a.keys() and f not in F_not_a.keys():
-            w_dicc.update({f:F_is_a[f]['prob']*F_is_a[f]['count']})
+            calc = (F_is_a[f]['prob'])
+            w_dicc.update({f:calc})
         elif f not in F_is_a.keys() and f in F_not_a.keys():
-            w_dicc.update({f:F_not_a[f]['prob']*F_not_a[f]['count']})
+            calc = (0 - F_not_a[f]['prob'])
+            w_dicc.update({f:calc})
         else:
              w_dicc.update({f:0.0})
 
 
-
-
     magnitude = abs(np.linalg.norm(np.array(list(w_dicc.values()))) )# ||w||
+    w=0
     for k,v in w_dicc.items():      #w / ||w||
-        w_dicc.update({k:v/magnitude})    
-    ta = -b / magnitude #-b / ||w||
-    knowledge_model = (w_dicc,ta)
+        w+= v
+        #w_dicc.update({k:v/magnitude})    
+    ta = -b / magnitude #-b / ||w|| threshold
+    ua = w/magnitude #value
+    knowledge_model = (w_dicc,ta,ua)
     return knowledge_model
 
 
@@ -110,7 +120,7 @@ def evaluation_process(x,knowledge_model):
     if knowledge_model[1] < 0:
         pro_membership_score = pro_membership_score + math.fabs(knowledge_model[1])
     else:
-        prop_nonmembership_score = pro_nonmembership_score + knowledge_model[1]
+        pro_nonmembership_score = pro_nonmembership_score + knowledge_model[1]
     
     list_words = x.split(' ')
     list_words = list(filter(None,list_words))
@@ -120,10 +130,10 @@ def evaluation_process(x,knowledge_model):
             pro_membership_score = pro_membership_score + sf
             Pro_membership.update({f:sf})
         else:
-            prop_nonmembership_score = prop_nonmembership_score + math.fabs(sf)
+            pro_nonmembership_score = pro_nonmembership_score + math.fabs(sf)
             Pro_nonmembership.update({f:math.fabs(sf)})
 
-    maxLevel = max([1,pro_membership_score + prop_nonmembership_score])
+    maxLevel = max([1,pro_membership_score + pro_nonmembership_score])
     for k,v in Pro_membership.items():
         Pro_membership.update({k:v/maxLevel})
     for k,v in Pro_nonmembership.items():
@@ -134,12 +144,10 @@ def evaluation_process(x,knowledge_model):
 
     return xNB_Classes.xAIFSElement(x,(pro_membership_score_max_level,Pro_membership),(pro_nonmembership_score_max_level,Pro_nonmembership))
 
-know = learning_process('earn',pre_procesing_train(),pre_processing_cat())
+know = learning_process('gold',pre_procesing_train(),pre_processing_cat())
 
-test = 'champion product board director approv twoforon stock split common share sharehold record april compani board vote recommend sharehold annual meet april increas author capit stock mln mln share'
+test = 'commod credit corpor ccc accept export bonu offer cover sale long ton wheat flour north yemen us agricultur depart said wheat shipment marchmai bonu award dlr tonn paid form commod ccc inventori bonu award pillsburi compani wheat flour purchas complet export enhanc program initi announc april said'
 
 ev = evaluation_process(test,know)
+print(ev)
 
-element  = xNB_Classes.xAAD(ev.mu_hat[0],ev.mu_hat[1])
-
-AICharts_Report.AIChart_plot_data_treemap(element,limit=10)
