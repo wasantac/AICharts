@@ -30,6 +30,14 @@ def pre_procesing_train(filename='./data/reuter2-training.dat'):
 
         
 
+def count_data(f,x):
+    total = 0
+    for word in x:
+        if f == word:
+            total += 1
+    return total
+
+    
 def learning_process(A,Xo,categories):
     members_A = 0
     non_members_A = 0
@@ -97,21 +105,16 @@ def learning_process(A,Xo,categories):
              w_dicc.update({f:0.0})
 
 
-    magnitude = abs(np.linalg.norm(np.array(list(w_dicc.values()))) )# ||w||
+    magnitude = np.linalg.norm(np.array(list(w_dicc.values())))# ||w||
     for k,v in w_dicc.items():      #w / ||w||
         w_dicc.update({k:v/magnitude}) 
+    
     ta = -b / magnitude #-b / ||w|| threshold
     knowledge_model = (w_dicc,ta)
     return knowledge_model
 
 
 
-def count_data(f,x):
-    total = 0
-    for word in x:
-        if f == word:
-            total += 1
-    return total
 
 def evaluation_process(x,knowledge_model):
     Pro_membership = {}
@@ -148,7 +151,7 @@ def evaluation_process(x,knowledge_model):
 
 know = learning_process('wheat',pre_procesing_train('./processed/reuters-training.dat'),pre_processing_cat('./processed/reuters-cat-doc.qrels'))
 
-test = 'the london stock exchang s tradedopt market plan volum growth of at least pct a year and will more than doubl the rang of option avail by theend of option committe chairman geoffrey chamberlainsaid he told a news confer that more option contract weretrad in than in the previou seven year of the market sexist chamberlain said the daili averag volum of contractstrad in februari thi year almost tripl to from in the same month last year and further rapid growthwa expect we re aim for stock option class by the end of said chamberlain these would correspond to the eligibleconstitu of the ft se share index chamberlain ad that two new equiti option were to beintroduc thi month option will be avail in sear plc lt sehl l gt from march and in plessey co plc lt plyl l gt frommarch the london stock exchang is the largest outsid the unitedst for option trade forty f equiti option twocurr option two govern bond gilt option and anopt on the ftse index are avail at present chamberlain said the stock exchang aim to consolidateth london option market s lead posit in europ especi import with french and swiss equiti optionstrad plan to start thi year i d go so far as to say the plan for growth areconserv one lead option analyst said predictingcontinu volum growth of around pct a month for at leastth next year he said much of the recent growth in option had come frominter market mak trade aim at hedg book posit butnow the retail option market wa begin to take off the market trade from a corner of the now larg desertedfloor of the london stock exchang the floor ha been leftalmost empti in the wake of the recent regulatori chang inth equiti and gilt govern bond market which haveencourag a move to electron off floor trade yesterday the stock exchang decid to close the floor toequiti trade altogeth and said it expect to make afin decis on the floor s futur by the end of the floor space could be use for a purpose built optionsmarket but chamberlain said that it wa unlik that theoption market would need more than half of the availablespac'
+test = 'food depart offici said the us depart of agricultur approv the continent grain co sale of tonn of soft wheat at us dlr a tonn c and f from pacif northwest to colombo they said the shipment wa for april to deliveri'
 
 ev = evaluation_process(test,know)
 print(ev)
