@@ -1,10 +1,11 @@
 import math
 import xNB_Classes
 import numpy as np
+from nltk.corpus import stopwords
 import AICharts_Report
 
-
-def pre_processing_cat(filename='./data/reuter2-cat-doc.qrels'):
+stop_words = set(stopwords.words('english'))
+def pre_processing_cat(filename):
     with open(filename) as file:
         lines = file.readlines()
         dictionary = {}
@@ -18,7 +19,7 @@ def pre_processing_cat(filename='./data/reuter2-cat-doc.qrels'):
                 dictionary[line[0]].append(number)
     return dictionary
 
-def pre_procesing_train(filename='./data/reuter2-training.dat'):
+def pre_procesing_train(filename):
     with open(filename) as file:
         dictionary = {}
         content = file.readlines()
@@ -27,6 +28,7 @@ def pre_procesing_train(filename='./data/reuter2-training.dat'):
             paragraph = content[i-2].strip('\n')
             dictionary.update({number:paragraph})
         return dictionary
+
 
         
 
@@ -37,7 +39,16 @@ def count_data(f,x):
             total += 1
     return total
 
-    
+
+def remove_stop_words(data):
+    list_words = data.split(' ')
+    list_words = list(filter(None,list_words))
+    filtered_words = [w for w in list_words  if not w.lower() in stop_words]
+    filtered_words = [w for w in list_words  if len(w) > 2]
+    list_words = filtered_words
+    return list_words
+
+
 def learning_process(A,Xo,categories):
     members_A = 0
     non_members_A = 0
@@ -45,51 +56,51 @@ def learning_process(A,Xo,categories):
     F_is_a = {} #F is member of category A
     F_not_a = {} # F is not member of category A
     for keys,values in Xo.items(): #Count Words and Memebers
-        list_words = values.split(' ')
-        list_words = list(filter(None,list_words))
+        list_words = remove_stop_words(values)
         if keys in categories[A]:
             members_A += 1
-            for f in list_words:
+            for f in set(list_words):
                 if f not in F_is_a.keys():
-                    F_is_a.update({f:{'count':1,'prob':0}}) 
+                    F_is_a.update({f:{'count':count_data(f,list_words),'prob':0}}) 
                 else:
-                    F_is_a[f]['count'] += 1
+                    F_is_a.update({f:{'count':F_is_a[f]['count']  + count_data(f,list_words),'prob':0}}) 
                 Fxo.add(f)
         else:
             non_members_A += 1
-            for f in list_words:
+            for f in set(list_words):
                 if f not in F_not_a.keys():
-                    F_not_a.update({f:{'count':1,'prob':0}}) 
+                    F_not_a.update({f:{'count':count_data(f,list_words),'prob':0}}) 
                 else:
-                    F_not_a[f]['count'] += 1
+                    F_not_a.update({f:{'count':F_not_a[f]['count']  + count_data(f,list_words),'prob':0}}) 
                 Fxo.add(f)
-
 
     total = members_A + non_members_A 
     prob_A = math.log((members_A + 1)/(total+1),10) #Probability of A
     prob_not_A = math.log((non_members_A + 1)/(total + 1),10) #Probability of not A
     for f in Fxo: #Conditional Probabilites
         if f in F_is_a.keys() and f in F_not_a.keys():
-            calc_a = (F_is_a[f]['count'] + 1)/(F_is_a[f]['count'] + F_not_a[f]['count'] + len(Fxo))
-            calc_not_a = (F_not_a[f]['count'] + 1)/(F_is_a[f]['count'] + F_not_a[f]['count'] + len(Fxo))
+            calc_a = (F_is_a[f]['count'] + 1)/(F_is_a[f]['count'] + F_not_a[f]['count'] + len(Fxo)) 
+            calc_not_a = (F_not_a[f]['count'] + 1)/(F_is_a[f]['count'] + F_not_a[f]['count'] + len(Fxo)) 
 
-            prob_f_a = math.log(calc_a,10)
-            prob_f_not_a = math.log(calc_not_a,10)
+            prob_f_a = math.log(calc_a,10) 
+            prob_f_not_a = math.log(calc_not_a,10) 
 
             F_is_a[f]['prob'] = prob_f_a
             F_not_a[f]['prob'] =  prob_f_not_a
         elif f in F_is_a.keys() and f not in F_not_a.keys():
             calc_a = (F_is_a[f]['count'] + 1)/(F_is_a[f]['count'] + 0 + len(Fxo))
-            prob_f_a = math.log(calc_a,10)
+            prob_f_a = math.log(calc_a,10) 
             F_is_a[f]['prob'] = prob_f_a
 
         elif f not in F_is_a.keys() and f in F_not_a.keys():
             calc_not_a = (F_not_a[f]['count'] + 1)/( 0+ F_not_a[f]['count'] + len(Fxo))
-            prob_f_not_a = math.log(calc_not_a ,10)
+            prob_f_not_a = math.log(calc_not_a ,10) 
             F_not_a[f]['prob'] =  prob_f_not_a
-            
+
 
     b = prob_A - prob_not_A
+
+     # w <- 0
     w_dicc ={}
     for f in Fxo: 
         if f in F_is_a.keys() and f in F_not_a.keys():
@@ -117,6 +128,7 @@ def learning_process(A,Xo,categories):
 
 
 def evaluation_process(x,knowledge_model):
+
     Pro_membership = {}
     Pro_nonmembership = {}
     pro_membership_score = 0
@@ -127,9 +139,8 @@ def evaluation_process(x,knowledge_model):
     else:
         pro_nonmembership_score = pro_nonmembership_score + knowledge_model[1]
     
-    list_words = x.split(' ')
-    list_words = list(filter(None,list_words))
-    for f in list_words:
+    list_words = remove_stop_words(x)
+    for f in set(list_words):
         sf = count_data(f,list_words) * knowledge_model[0][f]
         if sf > 0:
             pro_membership_score = pro_membership_score + sf
@@ -151,8 +162,10 @@ def evaluation_process(x,knowledge_model):
 
 know = learning_process('wheat',pre_procesing_train('./processed/reuters-training.dat'),pre_processing_cat('./processed/reuters-cat-doc.qrels'))
 
+
 test = 'food depart offici said the us depart of agricultur approv the continent grain co sale of tonn of soft wheat at us dlr a tonn c and f from pacif northwest to colombo they said the shipment wa for april to deliveri'
 
 ev = evaluation_process(test,know)
 print(ev)
+
 

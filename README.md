@@ -14,6 +14,7 @@ Use the package manager [pip](https://pip.pypa.io/en/stable/) to install all the
     <li>Matplotlib</li>
     <li>Squarify</li>
     <li>Networkx</li>
+    <li>nltk</li>
 </ul>
 
 ```bash
