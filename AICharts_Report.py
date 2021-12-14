@@ -19,10 +19,14 @@ def AIChart_save_file(title,saveImg = False,savePDF = False,saveEPS= False):
         plt.savefig('{title}.eps'.format(title=title),format='eps')
 
 
-def AIChart_plot_data_treemap(xAAD,title='Treemap',limit=0,saveImg = False,savePDF = False,saveEPS=False,show=True):
+def AIChart_plot_data_treemap(xAAD,mode='p',title='Treemap',limit=0,saveImg = False,savePDF = False,saveEPS=False,show=True):
     dictionary = xAAD.dictionary
     k,v = dictionary.keys(),dictionary.values()
     df = pd.DataFrame.from_dict({'token':k,'weight':v}) #Dataframe to sort the data
+    if mode == 'p':
+        df = df.loc[df['weight'] > 0]
+    else:
+        df = df.loc[df['weight'] < 0]
     df_sorted = df.sort_values(by='weight',ascending=False).drop_duplicates(subset=['token']) #Sorted dataframe
     tokens = df_sorted['token'].to_list()
     weights = df_sorted['weight'].to_list() 
@@ -31,6 +35,8 @@ def AIChart_plot_data_treemap(xAAD,title='Treemap',limit=0,saveImg = False,saveP
             tokens = tokens[:limit]
             weights = weights[:limit]
     cmap = cm.get_cmap('copper',100) #Color map for the treemap
+    if mode != 'p':
+        cmap = cm.get_cmap('cividis',100)
     mini = min(weights)
     maxi = max(weights)
     norm = mpl.colors.Normalize(vmin=mini,vmax=maxi)
@@ -70,7 +76,10 @@ def AIChart_plot_data_word_graph(xAAD,text_list,show=True,title="Word Graph",sav
     G.add_nodes_from(keys)
     node_size = []
     for k,v in graph_dictionary.items(): 
-        node_size.append(10+500*v['weight']) #Linear function to adjust node size
+        if v['weight'] <= 0:
+            node_size.append(0)
+        else:
+            node_size.append(10+500*v['weight']) #Linear function to adjust node size
         for edge in v['edges']:
             G.add_edge(k,edge)
     pos = nx.spring_layout(G, k=0.2, iterations=30)
@@ -99,22 +108,26 @@ def AIChart_plot_data_Influence_Map(xAAD,text_list,title="Influence Map",show=Tr
         font_size = 15
         if word not in dictionary.keys():
             plt.text(next_word,contador - next_line,word,fontsize=15,color='black',wrap=True)
+        elif dictionary[word] == 0:
+            plt.text(next_word,contador - next_line,word,fontsize=15,color='black',wrap=True)
         else:
-            font_size = dictionary[word] * 30
-            if color:
+            font_size = (dictionary[word]  ) * 30
+            if font_size < 8:
+                font_size = 9
+            if dictionary[word] < 0:
+                font_size = -dictionary[word] * 30
                 if font_size < 8:
                     font_size = 9
-                if font_size < 15:
-                    plt.text(next_word,contador - next_line,word,fontsize=font_size,color='blue',fontstyle='oblique',wrap=True)
+                if color:
+                    plt.text(next_word,contador - next_line,word,fontsize=font_size,color='blue',wrap=True)
                 else:
-                    plt.text(next_word,contador - next_line,word,fontsize=font_size,color='red',wrap=True)    
+                    plt.text(next_word,contador - next_line,r'\underline{%s}'%(word),useTex=True,fontsize=font_size,color='black',wrap=True)
             else:
-                if font_size < 8:
-                    font_size = 9
-                if font_size < 15:
-                    plt.text(next_word,contador - next_line,r'\underline{%s}'%(word),useTex=True,fontsize=font_size,color='black',fontstyle='oblique',wrap=True)
+                if color:
+                    plt.text(next_word,contador - next_line,word,fontsize=font_size,color='red',wrap=True)
                 else:
-                    plt.text(next_word,contador - next_line,word,fontsize=font_size,color='black',wrap=True)
+                    plt.text(next_word,contador - next_line,word,useTex=True,fontsize=font_size,color='black',fontstyle='oblique',wrap=True)
+
 
             
         next_word = next_word + len(word)*0.13*font_size/30 + 0.15

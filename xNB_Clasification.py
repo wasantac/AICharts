@@ -1,10 +1,52 @@
 import math
 import xNB_Classes
 import numpy as np
+import nltk
+from nltk.stem.porter import PorterStemmer
 from nltk.corpus import stopwords
+import re
 import AICharts_Report
 
 stop_words = set(stopwords.words('english'))
+stop_words.add('the')
+stop_words.add('they')
+
+def transform(data,tokenize=True,withNumbers=False):
+    porter_stemmer = PorterStemmer()
+    body = str(data).replace('\n',' ')
+    if withNumbers:
+        body = re.sub(' +', ' ', body)
+        body = re.sub("[^a-zA-Z\d\,\.]+"," ",body)
+        body = re.sub("[^a-zA-Z\d\,\s]+","",body)
+    else:
+        body = re.sub(' +', ' ', body)
+        body = re.sub("[^a-zA-Z\.]+"," ",body)
+        body = re.sub("[^a-zA-Z\s]+","",body)
+    if tokenize:
+        nltk_tokens = nltk.word_tokenize(body)
+        nltk_tokens.pop()
+        for i in range(len(nltk_tokens)):
+            nltk_tokens[i] = porter_stemmer.stem(nltk_tokens[i])
+            body = ' '.join(nltk_tokens)
+    return body
+
+
+def set_weights(data,ev):
+    body = transform(data,tokenize=False,withNumbers=True)
+    list_words = body.split(" ")
+    dictionary = {}
+    porter_stemmer = PorterStemmer()
+    for i in list_words:
+        token = porter_stemmer.stem(i)
+        if token in ev.mu_hat[1].keys():
+            dictionary.update({i: ev.mu_hat[1][token]}) 
+        elif token in ev.nu_hat[1].keys():
+            dictionary.update({i: -ev.nu_hat[1][token]}) 
+        else:
+            dictionary.update({i:0.0}) 
+    return (body,xNB_Classes.xAAD(ev.hesitation(),dictionary))
+
+
 def pre_processing_cat(filename):
     with open(filename) as file:
         lines = file.readlines()
@@ -19,6 +61,7 @@ def pre_processing_cat(filename):
                 dictionary[line[0]].append(number)
     return dictionary
 
+
 def pre_procesing_train(filename):
     with open(filename) as file:
         dictionary = {}
@@ -29,9 +72,7 @@ def pre_procesing_train(filename):
             dictionary.update({number:paragraph})
         return dictionary
 
-
         
-
 def count_data(f,x):
     total = 0
     for word in x:
@@ -43,8 +84,11 @@ def count_data(f,x):
 def remove_stop_words(data):
     list_words = data.split(' ')
     list_words = list(filter(None,list_words))
-    filtered_words = [w for w in list_words  if not w.lower() in stop_words]
-    filtered_words = [w for w in list_words  if len(w) > 2]
+    filtered_words = []
+    for w in list_words:
+        if w not in stop_words:
+            filtered_words.append(w)
+    filtered_words = [w for w in filtered_words  if len(w) > 2]
     list_words = filtered_words
     return list_words
 
@@ -96,12 +140,8 @@ def learning_process(A,Xo,categories):
             calc_not_a = (F_not_a[f]['count'] + 1)/( 0+ F_not_a[f]['count'] + len(Fxo))
             prob_f_not_a = math.log(calc_not_a ,10) 
             F_not_a[f]['prob'] =  prob_f_not_a
-
-
     b = prob_A - prob_not_A
-
-     # w <- 0
-    w_dicc ={}
+    w_dicc ={} # w <- 0
     for f in Fxo: 
         if f in F_is_a.keys() and f in F_not_a.keys():
             calc = (F_is_a[f]['prob'] - F_not_a[f]['prob'])
@@ -114,31 +154,23 @@ def learning_process(A,Xo,categories):
             w_dicc.update({f:calc})
         else:
              w_dicc.update({f:0.0})
-
-
     magnitude = np.linalg.norm(np.array(list(w_dicc.values())))# ||w||
     for k,v in w_dicc.items():      #w / ||w||
         w_dicc.update({k:v/magnitude}) 
-    
     ta = -b / magnitude #-b / ||w|| threshold
     knowledge_model = (w_dicc,ta)
     return knowledge_model
 
 
-
-
 def evaluation_process(x,knowledge_model):
-
     Pro_membership = {}
     Pro_nonmembership = {}
     pro_membership_score = 0
     pro_nonmembership_score = 0
-
     if knowledge_model[1] < 0:
         pro_membership_score = pro_membership_score + math.fabs(knowledge_model[1])
     else:
         pro_nonmembership_score = pro_nonmembership_score + knowledge_model[1]
-    
     list_words = remove_stop_words(x)
     for f in set(list_words):
         sf = count_data(f,list_words) * knowledge_model[0][f]
@@ -148,24 +180,25 @@ def evaluation_process(x,knowledge_model):
         else:
             pro_nonmembership_score = pro_nonmembership_score + math.fabs(sf)
             Pro_nonmembership.update({f:math.fabs(sf)})
-
     maxLevel = max([1,pro_membership_score + pro_nonmembership_score])
     for k,v in Pro_membership.items():
         Pro_membership.update({k:v/maxLevel})
     for k,v in Pro_nonmembership.items():
         Pro_nonmembership.update({k:v/maxLevel})
-    
     pro_membership_score_max_level = pro_membership_score / maxLevel
     pro_nonmembership_score_max_level = pro_nonmembership_score / maxLevel
-
     return xNB_Classes.xAIFSElement(x,(pro_membership_score_max_level,Pro_membership),(pro_nonmembership_score_max_level,Pro_nonmembership))
 
+
 know = learning_process('wheat',pre_procesing_train('./processed/reuters-training.dat'),pre_processing_cat('./processed/reuters-cat-doc.qrels'))
-
-
-test = 'food depart offici said the us depart of agricultur approv the continent grain co sale of tonn of soft wheat at us dlr a tonn c and f from pacif northwest to colombo they said the shipment wa for april to deliveri'
-
-ev = evaluation_process(test,know)
-print(ev)
-
-
+test1 = '''Food Department officials said the U.S.
+Department of Agriculture approved the Continental Grain Co
+sale of 52,500 tonnes of soft wheat at 89 U.S. Dlrs a tonne C
+and F from Pacific Northwest to Colombo.
+    They said the shipment was for April 8 to 20 delivery.
+ REUTER'''
+transformed = transform(test1,False)
+tokenized = transform(test1)
+ev = evaluation_process(tokenized,know)
+final_data = set_weights(test1,ev)
+AICharts_Report.AIChart_plot_data_treemap(final_data[1],mode='n')
