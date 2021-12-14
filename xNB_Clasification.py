@@ -7,6 +7,7 @@ from nltk.corpus import stopwords
 import re
 import AICharts_Report
 
+
 stop_words = set(stopwords.words('english'))
 stop_words.add('the')
 stop_words.add('they')
@@ -39,9 +40,9 @@ def set_weights(data,ev):
     for i in list_words:
         token = porter_stemmer.stem(i)
         if token in ev.mu_hat[1].keys():
-            dictionary.update({i: ev.mu_hat[1][token]}) 
+            dictionary.update({i: ev.mu_hat[1][token]*400}) 
         elif token in ev.nu_hat[1].keys():
-            dictionary.update({i: -ev.nu_hat[1][token]}) 
+            dictionary.update({i: -ev.nu_hat[1][token]*400}) 
         else:
             dictionary.update({i:0.0}) 
     return (body,xNB_Classes.xAAD(ev.hesitation(),dictionary))
@@ -190,15 +191,14 @@ def evaluation_process(x,knowledge_model):
     return xNB_Classes.xAIFSElement(x,(pro_membership_score_max_level,Pro_membership),(pro_nonmembership_score_max_level,Pro_nonmembership))
 
 
-know = learning_process('wheat',pre_procesing_train('./processed/reuters-training.dat'),pre_processing_cat('./processed/reuters-cat-doc.qrels'))
+know = learning_process('grain',pre_procesing_train('./processed/reuters-training.dat'),pre_processing_cat('./processed/reuters-cat-doc.qrels'))
 test1 = '''Food Department officials said the U.S.
 Department of Agriculture approved the Continental Grain Co
 sale of 52,500 tonnes of soft wheat at 89 U.S. Dlrs a tonne C
 and F from Pacific Northwest to Colombo.
     They said the shipment was for April 8 to 20 delivery.
  REUTER'''
-transformed = transform(test1,False)
 tokenized = transform(test1)
 ev = evaluation_process(tokenized,know)
 final_data = set_weights(test1,ev)
-AICharts_Report.AIChart_plot_data_treemap(final_data[1],mode='n')
+AICharts_Report.AIChart_plot_data_Influence_Map(final_data[1],final_data[0].split(' '),color=False,title="Grain",saveImg=True)

@@ -10,6 +10,7 @@ import xNB_Classes
 import networkx as nx
 
 
+
 def AIChart_save_file(title,saveImg = False,savePDF = False,saveEPS= False):
     if saveImg:
         plt.savefig('{title}.png'.format(title=title))
@@ -126,7 +127,7 @@ def AIChart_plot_data_Influence_Map(xAAD,text_list,title="Influence Map",show=Tr
                 if color:
                     plt.text(next_word,contador - next_line,word,fontsize=font_size,color='red',wrap=True)
                 else:
-                    plt.text(next_word,contador - next_line,word,useTex=True,fontsize=font_size,color='black',fontstyle='oblique',wrap=True)
+                    plt.text(next_word,contador - next_line,r'\emph{%s}'%(word),useTex=True,fontsize=font_size,color='black',wrap=True)
 
 
             

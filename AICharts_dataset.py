@@ -57,18 +57,3 @@ def read_sgm():
                             data_body = ".I {docID}\n.W\n{body}\n\n".format(docID=docID,body=body)
                             create_dir('./processed/reuters-training.dat',data_body)
                     
-
-def test_sgm():
-    test = '''Food Department officials said the U.S.
-Department of Agriculture approved the Continental Grain Co
-sale of 52,500 tonnes of soft wheat at 89 U.S. Dlrs a tonne C
-and F from Pacific Northwest to Colombo.
-    They said the shipment was for April 8 to 20 delivery.
- REUTER'''
-    body = str(test).replace('\n',' ')
-    body = re.sub(' +', ' ', body)
-    body = re.sub("[^a-zA-Z\.]+"," ",body)
-    body = re.sub("[^a-zA-Z\s]+","",body)
-    print(body)
-
-read_sgm()
