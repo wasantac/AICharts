@@ -32,7 +32,7 @@ def transform(data,tokenize=True,withNumbers=False):
     return body
 
 
-def set_weights(data,ev):
+def set_weights(data,ev,weight_value=400):
     body = transform(data,tokenize=False,withNumbers=True)
     list_words = body.split(" ")
     dictionary = {}
@@ -40,9 +40,9 @@ def set_weights(data,ev):
     for i in list_words:
         token = porter_stemmer.stem(i)
         if token in ev.mu_hat[1].keys():
-            dictionary.update({i: ev.mu_hat[1][token]*400}) 
+            dictionary.update({i: ev.mu_hat[1][token]*weight_value}) 
         elif token in ev.nu_hat[1].keys():
-            dictionary.update({i: -ev.nu_hat[1][token]*400}) 
+            dictionary.update({i: -ev.nu_hat[1][token]*weight_value}) 
         else:
             dictionary.update({i:0.0}) 
     return (body,xNB_Classes.xAAD(ev.hesitation(),dictionary))
