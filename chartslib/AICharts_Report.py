@@ -9,7 +9,7 @@ import squarify
 import xNB_Classes
 import networkx as nx
 
-plt.rcParams['text.latex.preamble'] = [r'\usepackage{mathptmx}']  # load times roman font
+plt.rcParams['text.latex.preamble'] = r'\usepackage{mathptmx}'  # load times roman font
 plt.rcParams['font.family'] = 'serif'  # use serif font as default
 plt.rcParams['text.usetex'] = True  # enable LaTeX rendering globally
 

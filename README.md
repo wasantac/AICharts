@@ -1,6 +1,6 @@
 # AICharts
 
-AICharts is a data visualization package.
+AICharts is an open source data visualization library that implements a naive bayes algorithm that makes text categorization predictions interpretable.
 
 ### Installation
 
@@ -19,17 +19,17 @@ Use the package manager [pip](https://pip.pypa.io/en/stable/) to install all the
 </ul>
 
 ```bash
-    pip install numpy pandas matplotlib squarify networkx beautifulsoup4
+pip install numpy pandas matplotlib squarify networkx beautifulsoup4
 ```
-It is very importante to run de nltkConfig.py if you don't have installed the necesary packages. 
-It is needed to have the stopwords and the punkt package from nltk. If you wish to install it yourself you need to run python and do:
+It is very importante to run de nltkConfig.py file if you don't have installed the necessary packages. 
+It is needed to have the stopwords and the punkt package from nltk. If you wish to install it yourself you need to run python and run:
 
 ```python
-    import nltk
-    nltk.download('stopwords')
-    nltk.download('punkt')
+import nltk
+nltk.download('stopwords')
+nltk.download('punkt')
 ```
 ### To install latex in linux:
 ```bash
-    sudo apt-get install texlive-full
+sudo apt-get install texlive-full
 ```
