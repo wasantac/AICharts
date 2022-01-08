@@ -14,8 +14,6 @@ ev = xNB_Clasification.evaluation_process(tokenized,know)
 print(ev)
 print(ev.buoyancy())
 final_data = xNB_Clasification.set_weights(test1,ev)
-
-#You can define a mode, 1 for mu_hat and 0 for nu_hat 
 final_data = xNB_Clasification.set_weights(test1,ev,weight_value=10)
 text_list = final_data[0].split(" ")
 AICharts_Report.AIChart_plot_data_word_graph(final_data[1],text_list=text_list,title="Grain",saveImg=True)
