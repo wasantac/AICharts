@@ -11,6 +11,7 @@ import AICharts_Report
 stop_words = set(stopwords.words('english'))
 stop_words.add('the')
 stop_words.add('they')
+stop_words.add('said')
 
 def transform(data,tokenize=True,withNumbers=False):
     porter_stemmer = PorterStemmer()
@@ -191,14 +192,17 @@ def evaluation_process(x,knowledge_model):
     return xNB_Classes.xAIFSElement(x,(pro_membership_score_max_level,Pro_membership),(pro_nonmembership_score_max_level,Pro_nonmembership))
 
 
-know = learning_process('grain',pre_procesing_train('./processed/reuters-training.dat'),pre_processing_cat('./processed/reuters-cat-doc.qrels'))
-test1 = '''Food Department officials said the U.S.
-Department of Agriculture approved the Continental Grain Co
-sale of 52,500 tonnes of soft wheat at 89 U.S. Dlrs a tonne C
-and F from Pacific Northwest to Colombo.
-    They said the shipment was for April 8 to 20 delivery.
+"""know = learning_process('crude',pre_procesing_train('./processed/reuters-training.dat'),pre_processing_cat('./processed/reuters-cat-doc.qrels'))
+test1 = '''The issue price of the European
+Investment Bank's 300 mln guilder 6.25 pct bullet bond due
+1995, announced on April 1, has been set at par, lead manager
+Amro bank said.
+    Subscriptions remain open until 1300 gmt tomorrow, April 9.
+    Payment is due May 14 and coupon date is May 15.
  REUTER'''
 tokenized = transform(test1)
 ev = evaluation_process(tokenized,know)
+print(ev)
+print(ev.buoyancy())
 final_data = set_weights(test1,ev)
-AICharts_Report.AIChart_plot_data_Influence_Map(final_data[1],final_data[0].split(' '),color=False,title="Grain",saveImg=True)
+#AICharts_Report.AIChart_plot_data_Influence_Map(final_data[1],final_data[0].split(' '),color=False,title="Grain",saveImg=True)"""

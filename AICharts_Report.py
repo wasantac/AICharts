@@ -9,6 +9,9 @@ import squarify
 import xNB_Classes
 import networkx as nx
 
+plt.rcParams['text.latex.preamble'] = [r'\usepackage{mathptmx}']  # load times roman font
+plt.rcParams['font.family'] = 'serif'  # use serif font as default
+plt.rcParams['text.usetex'] = True  # enable LaTeX rendering globally
 
 
 def AIChart_save_file(title,saveImg = False,savePDF = False,saveEPS= False):
@@ -139,18 +142,3 @@ def AIChart_plot_data_Influence_Map(xAAD,text_list,title="Influence Map",show=Tr
     AIChart_save_file(title,saveImg=saveImg,savePDF=savePDF,saveEPS=saveEPS)
     if show:
         plt.show()
-#test
-word_dicc = {}
-full_text_list = []
-
-with open("test.txt","r") as file:
-    words = file.readlines()
-    for line in words:
-        full_text_list.append(line.rstrip("\n"))
-        word_dicc.update({line.rstrip("\n"):rd.random()})
-data = xNB_Classes.xAAD(rd.random(),word_dicc)
-
-
-#AIChart_plot_data_treemap(data,savePDF=True)
-#AIChart_plot_data_word_graph(data,full_text_list)
-#AIChart_plot_data_Influence_Map(data,full_text_list,color=True)
