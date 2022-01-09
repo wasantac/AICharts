@@ -18,4 +18,4 @@ final_data = xNB_Clasification.set_weights(test1,ev)
 
 #You can define a mode, 1 for mu_hat and 0 for nu_hat 
 #This is very important for the Treemap to identify the positive and negative values infividualy
-AICharts_Report.AIChart_plot_data_treemap(ev.define_xAAD(mode=1),title="Grain",saveImg=True)
+AICharts_Report.AIChart_plot_data_treemap(final_data[1],title="Grain",saveImg=True)
