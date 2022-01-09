@@ -1,9 +1,22 @@
 class xAAD:
+    """Extended Augmented Appraisal Degree
+        value of the xAAD element and the corresponding dictionary with word weights
+    """
     def __init__(self,value,dictionary):
         self.value = value
         self.dictionary = dictionary
 
+    def __repr__(self):
+        return "(value: {value}; dictionary: {dict})".format(value=self.value,dict=self.dictionary)
+        
+    
+
 class xAIFSElement:
+    """ Extended Augmented Intuitionistic Fuzzy Set Element
+
+    IFSElement with xAAD + text data
+    
+    """
     def __init__(self,x,mu_hat,nu_hat):
         self.x = x
         self.mu_hat = mu_hat
@@ -14,12 +27,6 @@ class xAIFSElement:
         
     def buoyancy(self):
         return self.mu_hat[0] - self.nu_hat[0]
-    
-    def define_xAAD(self,mode=1):
-        if mode == 1:
-            return xAAD(self.mu_hat[0],self.mu_hat[1])
-        else:
-            return xAAD(self.nu_hat[0],self.nu_hat[1])
 
     def hesitation(self):
         return 1.0 - self.mu_hat[0] - self.nu_hat[0]

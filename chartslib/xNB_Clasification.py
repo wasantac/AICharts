@@ -11,9 +11,8 @@ import AICharts_Report
 stop_words = set(stopwords.words('english'))
 stop_words.add('the')
 stop_words.add('they')
-stop_words.add('said')
 
-def transform(data,tokenize=True,withNumbers=False):
+def transform(data,tokenize=True,withNumbers=False): #transfrom function to get the text ready for categorization
     porter_stemmer = PorterStemmer()
     body = str(data).replace('\n',' ')
     if withNumbers:
@@ -33,7 +32,7 @@ def transform(data,tokenize=True,withNumbers=False):
     return body
 
 
-def set_weights(data,ev,weight_value=400):
+def set_weights(data,ev,weight_value=400): #sets a weight for data visualization depending on the evaluation process weight
     body = transform(data,tokenize=False,withNumbers=True)
     list_words = body.split(" ")
     dictionary = {}
@@ -68,14 +67,14 @@ def pre_procesing_train(filename):
     with open(filename) as file:
         dictionary = {}
         content = file.readlines()
-        for i in range(4,len(content) - 1 + 4,4): #desde 0 = .I numero , 1= .W , 2= parrafo  for i in range(0,100,4)
+        for i in range(4,len(content) - 1 + 4,4): #from 0 = .I number , 1=.W , 2=paragraph
             number = content[i-4].split(" ")[-1].strip('\n')
             paragraph = content[i-2].strip('\n')
             dictionary.update({number:paragraph})
         return dictionary
 
         
-def count_data(f,x):
+def count_data(f,x): #counts words of a paragraph
     total = 0
     for word in x:
         if f == word:
@@ -83,7 +82,7 @@ def count_data(f,x):
     return total
 
 
-def remove_stop_words(data):
+def remove_stop_words(data): #removes the stopwords for feature weights
     list_words = data.split(' ')
     list_words = list(filter(None,list_words))
     filtered_words = []
@@ -96,6 +95,11 @@ def remove_stop_words(data):
 
 
 def learning_process(A,Xo,categories):
+    """
+        The purpose of the learning process is to obtain a knowledge model of a specific category [1].
+
+        [1] M. Loor and G. De Tré, “Contextualizing Naive Bayes Predictions,” in Information Processing and Management of Uncertainty in Knowledge-Based Systems, Cham, 2020, pp. 814–827. [Online]. Available: https://link.springer.com/chapter/10.1007/978-3-030-50153-2_60
+    """
     members_A = 0
     non_members_A = 0
     Fxo = set() #Feature Set
@@ -165,6 +169,11 @@ def learning_process(A,Xo,categories):
 
 
 def evaluation_process(x,knowledge_model):
+    """
+        The purpose of the evaluation process is to obtain a contextualized evaluation of the membership to a given category. This algorithm uses the knowledge model for a category A generated from the learning process.[1]
+
+        [1] M. Loor and G. De Tré, “Contextualizing Naive Bayes Predictions,” in Information Processing and Management of Uncertainty in Knowledge-Based Systems, Cham, 2020, pp. 814–827. [Online]. Available: https://link.springer.com/chapter/10.1007/978-3-030-50153-2_60
+    """
     Pro_membership = {}
     Pro_nonmembership = {}
     pro_membership_score = 0
